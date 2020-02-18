@@ -27,9 +27,11 @@ EXPOSE 7080
 
 ADD docker.conf /usr/local/lsws/conf/templates/docker.conf
 ADD httpd_config.sh /usr/local/lsws/bin/httpd_config.sh
+add htpassword /usr/local/lsws/admin/conf/htpassword
 RUN /usr/local/lsws/bin/httpd_config.sh && rm /usr/local/lsws/bin/httpd_config.sh
 RUN chown 999:999 /usr/local/lsws/conf -R
 RUN cp -RP /usr/local/lsws/conf/ /usr/local/lsws/.conf/
+RUN cp -RP /usr/local/lsws/admin/conf /usr/local/lsws/admin/.conf/
 RUN ln -sf /usr/local/lsws/$PHP_VERSION/bin/lsphp /usr/local/lsws/fcgi-bin/lsphp7
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
