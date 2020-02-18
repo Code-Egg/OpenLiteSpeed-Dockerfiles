@@ -5,7 +5,7 @@ ARG OLS_VERSION
 ARG PHP_VERSION
 
 
-RUN apt-get update && apt-get install wget curl tzdata -y
+RUN apt-get update && apt-get install wget curl cron tzdata -y
 
 RUN wget https://openlitespeed.org/preuse/openlitespeed-$OLS_VERSION.tgz && \
     tar xzvf openlitespeed-$OLS_VERSION.tgz && cd openlitespeed && ./install.sh && rm -rf /openlitespeed
@@ -17,17 +17,13 @@ RUN wget -O /usr/local/lsws/admin/misc/lsup.sh \
     https://raw.githubusercontent.com/litespeedtech/openlitespeed/master/dist/admin/misc/lsup.sh && \
     chmod +x /usr/local/lsws/admin/misc/lsup.sh
 
-EXPOSE 7080
-
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
 	chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp && \
 	ln -s /usr/local/lsws/$PHP_VERSION/bin/lsphp /usr/bin/php
 
-RUN apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    add-apt-repository ppa:certbot/certbot && \
-    apt-get update && \
-    apt-get install -y certbot
+RUN wget -O -  https://get.acme.sh | sh
+
+EXPOSE 7080
 
 ADD docker.conf /usr/local/lsws/conf/templates/docker.conf
 ADD httpd_config.sh /usr/local/lsws/bin/httpd_config.sh
