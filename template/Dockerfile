@@ -27,6 +27,7 @@ EXPOSE 7080
 
 ADD docker.conf /usr/local/lsws/conf/templates/docker.conf
 ADD httpd_config.sh /usr/local/lsws/bin/httpd_config.sh
+add httpd_config.xml /usr/local/lsws/conf/httpd_config.xml
 add htpasswd /usr/local/lsws/admin/conf/htpasswd
 RUN /usr/local/lsws/bin/httpd_config.sh && rm /usr/local/lsws/bin/httpd_config.sh
 RUN chown 999:999 /usr/local/lsws/conf -R

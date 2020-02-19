@@ -35,4 +35,5 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /var/www/vhosts/
+RUN apt-get install vim -y
 CMD ["/usr/local/lsws/bin/lswsctrl","start"]
