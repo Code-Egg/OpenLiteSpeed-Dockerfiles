@@ -5,8 +5,12 @@ sudo: 'required'
 services:
   - docker
 env:
-  - OLS_VERSION=1.6.5 PHP_VERSION=lsphp72 FOLDER=template
-  - OLS_VERSION=1.6.6 PHP_VERSION=lsphp73 FOLDER=template
+  - OLS_VERSION=1.6.8 PHP_VERSION=lsphp73 FOLDER=template
+  - OLS_VERSION=1.6.8 PHP_VERSION=lsphp74 FOLDER=template
+  - OLS_VERSION=1.5.11 PHP_VERSION=lsphp73 FOLDER=template
+  - OLS_VERSION=1.5.11 PHP_VERSION=lsphp74 FOLDER=template
+  - OLS_VERSION=1.4.51 PHP_VERSION=lsphp73 FOLDER=template
+  - OLS_VERSION=1.4.51 PHP_VERSION=lsphp74 FOLDER=template
 
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
