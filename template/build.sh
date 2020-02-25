@@ -3,6 +3,7 @@ OLS_VERSION=''
 PHP_VERSION=''
 PUSH=''
 CONFIG=''
+TAG=''
 BUILDER='litespeedtech'
 REPO='openlitespeed-beta'
 
@@ -52,6 +53,9 @@ push_image(){
             CONFIG=$(echo --config ~/.docker/litespeedtech)
         fi
         docker ${CONFIG} push ${BUILDER}/${REPO}:${1}-${2}
+        if [ ! -z "${TAG}" ]; then
+            docker ${CONFIG} push ${BUILDER}/${REPO}:${3}
+        fi
     else
         echo 'Skip Push.'    
     fi
@@ -60,7 +64,7 @@ push_image(){
 main(){
     build_image ${OLS_VERSION} ${PHP_VERSION}
     test_image ${OLS_VERSION} ${PHP_VERSION}
-    push_image ${OLS_VERSION} ${PHP_VERSION}
+    push_image ${OLS_VERSION} ${PHP_VERSION} ${TAG}
 }
 
 check_input ${1}
@@ -77,6 +81,9 @@ while [ ! -z "${1}" ]; do
             check_input "${1}"
             PHP_VERSION="${1}"
             ;;
+        -tag | -TAG | -T) shift
+            TAG="${1}"
+            ;;       
         --push ) shift
             PUSH=true
             ;;            

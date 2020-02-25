@@ -18,16 +18,16 @@ notifications:
 services:
   - docker
 env:
+  - OLS_VERSION=1.6.9 PHP_VERSION=lsphp74 FOLDER=template TAG=latest
   - OLS_VERSION=1.6.9 PHP_VERSION=lsphp73 FOLDER=template
-  - OLS_VERSION=1.6.9 PHP_VERSION=lsphp74 FOLDER=template
+  - OLS_VERSION=1.5.11 PHP_VERSION=lsphp74 FOLDER=template  
   - OLS_VERSION=1.5.11 PHP_VERSION=lsphp73 FOLDER=template
-  - OLS_VERSION=1.5.11 PHP_VERSION=lsphp74 FOLDER=template
 
 script:
   - |
     if [ $TRAVIS_BRANCH == "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        cd $FOLDER && ./build.sh -ols $OLS_VERSION -php $PHP_VERSION --push
+        cd $FOLDER && ./build.sh -ols $OLS_VERSION -php $PHP_VERSION -tag $TAG --push
     else
         cd $FOLDER && ./build.sh -ols $OLS_VERSION -php $PHP_VERSION
     fi    
