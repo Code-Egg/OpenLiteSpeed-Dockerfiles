@@ -2,67 +2,65 @@
 OLS_VERSION=''
 PHP_VERSION=''
 PUSH=''
+CONFIG=''
+BUILDER='litespeedtech'
+REPO='openlitespeed-beta'
 
 help_message(){
     echo 'Command [-ols XX] [-php lsphpXX]'
     echo 'Command [-ols XX] [-php lsphpXX] --push'
-    echo 'Example: build.sh -ols 1.6.5 -php lsphp73 --push'
+    echo 'Example: build.sh -ols 1.6.8 -php lsphp74 --push'
+    exit 0
 }
 
 check_input(){
     if [ -z "${1}" ]; then
         help_message
-        exit 1
     fi
 }
 
 build_image(){
-    echo $1 $2
-    docker build . --tag litespeedtech/openlitespeed-beta:$1-$2 --build-arg OLS_VERSION=$1 --build-arg PHP_VERSION=$2
+    if [ -z "${1}" ] || [ -z "${2}" ]; then
+        help_message
+    else
+        echo "${1} ${2}"
+        docker build . --tag ${BUILDER}/${REPO}:${1}-${2} --build-arg OLS_VERSION=${1} --build-arg PHP_VERSION=${2}
+    fi    
 }
 
 test_image(){
-    ID=$(docker run -d litespeedtech/openlitespeed-beta:$1-$2)
-
-    docker exec -it $ID su -c 'mkdir -p /var/www/vhosts/localhost/html/ && echo "<?php phpinfo();" > /var/www/vhosts/localhost/html/index.php && /usr/local/lsws/bin/lswsctrl restart'
-
-    HTTP=$(docker exec -it $ID curl -s -o /dev/null -Ik -w "%{http_code}" http://localhost)
-    HTTPS=$(docker exec -it $ID curl -s -o /dev/null -Ik -w "%{http_code}" https://localhost)
-    docker kill $ID
-
-    if [[ "$HTTP" != "200" || "$HTTPS" != "200" ]]; then
-        echo "Test failed, localhost didn't return the right http code"
-        echo "http://localhost" returned "$HTTP"
-        echo "https://localhost" returned "$HTTPS"
+    ID=$(docker run -d ${BUILDER}/${REPO}:${1}-${2})
+    docker exec -it ${ID} su -c 'mkdir -p /var/www/vhosts/localhost/html/ \
+    && echo "<?php phpinfo();" > /var/www/vhosts/localhost/html/index.php \
+    && /usr/local/lsws/bin/lswsctrl restart'
+    HTTP=$(docker exec -it ${ID} curl -s -o /dev/null -Ik -w "%{http_code}" http://localhost)
+    HTTPS=$(docker exec -it ${ID} curl -s -o /dev/null -Ik -w "%{http_code}" https://localhost)
+    docker kill ${ID}
+    if [[ "${HTTP}" != "200" || "${HTTPS}" != "200" ]]; then
+        echo '[X] Test failed!'
+        echo "http://localhost returned ${HTTP}"
+        echo "https://localhost returned ${HTTPS}"
         exit 1
+    else
+        echo '[O] Tests passed!' 
     fi
-    echo "Tests passed"
 }
 
 push_image(){
-    if [ -f ~/.docker/litespeedtech/config.json ]; then
-        CONFIG=$(echo --config ~/.docker/litespeedtech)
+    if [ ! -z "${PUSH}" ]; then
+        if [ -f ~/.docker/litespeedtech/config.json ]; then
+            CONFIG=$(echo --config ~/.docker/litespeedtech)
+        fi
+        docker ${CONFIG} push ${BUILDER}/${REPO}:${1}-${2}
     else
-        CONFIG=''
+        echo 'Skip Push.'    
     fi
-    docker ${CONFIG} push litespeedtech/openlitespeed-beta:$1-$2
 }
 
 main(){
-    if [ -z "${OLS_VERSION}" ]; then
-        help_message
-        exit 1
-    fi
-    if [ -z "${PHP_VERSION}" ]; then
-        help_message
-        exit 1
-    fi
     build_image ${OLS_VERSION} ${PHP_VERSION}
     test_image ${OLS_VERSION} ${PHP_VERSION}
-    if [ ! -z "${PUSH}" ]; then
-        push_image ${OLS_VERSION} ${PHP_VERSION}
-    fi
-    
+    push_image ${OLS_VERSION} ${PHP_VERSION}
 }
 
 check_input ${1}
@@ -70,7 +68,6 @@ while [ ! -z "${1}" ]; do
     case ${1} in
         -[hH] | -help | --help)
             help_message
-            exit 1
             ;;
         -ols | -OLS_VERSION | -O) shift
             check_input "${1}"
@@ -85,7 +82,6 @@ while [ ! -z "${1}" ]; do
             ;;            
         *) 
             help_message
-            exit 1
             ;;              
     esac
     shift
