@@ -25,7 +25,11 @@ build_image(){
         help_message
     else
         echo "${1} ${2}"
-        docker build . --tag ${BUILDER}/${REPO}:${1}-${2} --build-arg OLS_VERSION=${1} --build-arg PHP_VERSION=${2}
+        if [ ! -z "${TAG}" ]; then
+            docker build . --tag ${BUILDER}/${REPO}:${TAG} --build-arg OLS_VERSION=${1} --build-arg PHP_VERSION=${2}
+        else
+            docker build . --tag ${BUILDER}/${REPO}:${1}-${2} --build-arg OLS_VERSION=${1} --build-arg PHP_VERSION=${2}
+        fi    
     fi    
 }
 
@@ -54,7 +58,7 @@ push_image(){
         fi
         docker ${CONFIG} push ${BUILDER}/${REPO}:${1}-${2}
         if [ ! -z "${TAG}" ]; then
-            docker ${CONFIG} push ${BUILDER}/${REPO}:${3}
+            docker ${CONFIG} push ${BUILDER}/${REPO}:${TAG}
         fi
     else
         echo 'Skip Push.'    
@@ -62,7 +66,7 @@ push_image(){
 }
 
 main(){
-    build_image ${OLS_VERSION} ${PHP_VERSION}
+    build_image ${OLS_VERSION} ${PHP_VERSION} ${TAG}
     test_image ${OLS_VERSION} ${PHP_VERSION}
     push_image ${OLS_VERSION} ${PHP_VERSION} ${TAG}
 }
