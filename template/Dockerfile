@@ -8,7 +8,11 @@ ARG PHP_VERSION
 RUN apt-get update && apt-get install wget curl cron tzdata -y
 
 RUN wget https://openlitespeed.org/preuse/openlitespeed-$OLS_VERSION.tgz && \
-    tar xzvf openlitespeed-$OLS_VERSION.tgz && cd openlitespeed && ./install.sh && rm -rf /openlitespeed
+    tar xzvf openlitespeed-$OLS_VERSION.tgz && cd openlitespeed && \
+    LINENUM=$(grep -n "LSPHPVER=" _in.sh | cut -d: -f 1) && \
+    sed -i "${LINENUM}d" _in.sh && \
+    sed -i "${LINENUM}iLSPHPVER=${PHP_VERSION}" _in.sh && \
+    ./install.sh && rm -rf ../openlitespeed ../openlitespeed-$OLS_VERSION.tgz
 
 RUN apt-get install mysql-client $PHP_VERSION $PHP_VERSION-common $PHP_VERSION-mysql $PHP_VERSION-opcache \
     $PHP_VERSION-curl $PHP_VERSION-json $PHP_VERSION-imagick $PHP_VERSION-redis $PHP_VERSION-memcached $PHP_VERSION-intl -y
